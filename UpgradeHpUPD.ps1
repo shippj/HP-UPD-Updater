@@ -1,8 +1,8 @@
 # Script to detect and upgrade HP Universal Print Driver (UPD) for PCL 6 and PostScript
-# Designed for GPO deployment - runs silently, with optional interactive output and version skip
+# Designed for GPO deployment
 
 param (
-    [switch]$SkipVersionCheck
+    [switch]$SilentInstall
 )
 
 # Define variables
@@ -33,19 +33,19 @@ function Write-Log {
     Write-Host $message
 }
 
-# Check drivers unless -SkipVersionCheck is specified
+# Check drivers unless -SilentInstall is specified
 $driversToProcess = @()
-if (-not $SkipVersionCheck) {
-    Write-Log "Checking installed drivers in Print Management..."
+if (-not $SilentInstall) {
+    Write-Log "Checking installed drivers..."
     $installedDrivers = Get-PrinterDriver | Where-Object { $drivers.Keys -contains $_.Name }
 
     if (-not $installedDrivers) {
-        Write-Log "No supported drivers ('HP Universal Printing PCL 6' or 'HP Universal Printing PS') found in Print Management. Aborting script."
+        Write-Log "No supported drivers ('HP Universal Printing PCL 6' or 'HP Universal Printing PS') found. Aborting script."
         exit 1
     }
 
     foreach ($driver in $installedDrivers) {
-        Write-Log "Found driver '${driver.Name}' in Print Management: $($driver | Format-List | Out-String)"
+        Write-Log "Found driver '${driver.Name}' : $($driver | Format-List | Out-String)"
         
         # Check version from specific driver file in DriverStore
         $driverPath = $drivers[$driver.Name].DriverPath
@@ -71,7 +71,7 @@ if (-not $SkipVersionCheck) {
         exit 0
     }
 } else {
-    Write-Log "Skipping version and driver checks due to -SkipVersionCheck parameter. Processing all drivers."
+    Write-Log "Skipping version and driver checks due to -SilentInstall parameter. Processing all drivers."
     $driversToProcess = $drivers.Keys
 }
 
@@ -158,7 +158,7 @@ foreach ($driverName in $driversToProcess) {
         Write-Log "Driver registration phase for '${driverName}'."
         $existingDriver = Get-PrinterDriver | Where-Object { $_.Name -eq $driverName }
         if ($existingDriver) {
-            Write-Log "Driver '${driverName}' already registered in Print Management: $($existingDriver | Format-List | Out-String)"
+            Write-Log "Driver '${driverName}' already registered : $($existingDriver | Format-List | Out-String)"
             #continue
         }
 
@@ -169,9 +169,9 @@ foreach ($driverName in $driversToProcess) {
         Write-Log "Failed to register driver '${driverName}': $_"
         $existingDriver = Get-PrinterDriver | Where-Object { $_.Name -eq $driverName }
         if ($existingDriver) {
-            Write-Log "Driver '${driverName}' still registered in Print Management: $($existingDriver | Format-List | Out-String)"
+            Write-Log "Driver '${driverName}' still registered : $($existingDriver | Format-List | Out-String)"
         } else {
-            Write-Log "Driver '${driverName}' not found in Print Management after failure."
+            Write-Log "Driver '${driverName}' not found after failure."
         }
     }
 
