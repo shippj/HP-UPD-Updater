@@ -1,4 +1,4 @@
-# HP-UPD-Updater
+# HP Universal Print Driver Updater
 Script to detect and upgrade HP Universal Print Driver (UPD) for PCL 6 and PostScript.  Designed for GPO deployment.  Can also perform silent fresh installs by running it with the -SilentInstall parameter
 
 I got an email from HP warning me about critical security vulnerabilities in the UPD.
